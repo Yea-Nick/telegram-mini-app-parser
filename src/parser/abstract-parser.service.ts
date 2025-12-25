@@ -2,10 +2,10 @@ import { HeadersInit } from "node-fetch";
 import { SocksProxyAgent } from "socks-proxy-agent";
 import { BaseService } from "../service";
 import { IUserBotService, UserBot, UserBotService, UserData } from "../user-bot";
-import { IParserService, ParserServiceOptions, UserBotData } from ".";
+import { ITelegramMiniAppParser, TelegramMiniAppParserOptions, UserBotData } from ".";
 import { IRequesterService, RequestMethod, ApiRequestOptions, RequesterService } from "../requester";
 
-export abstract class ParserService<AuthTokenPayload, AuthTokenResponse, WorkerResponse> extends BaseService implements IParserService<WorkerResponse> {
+export abstract class TelegramMiniAppParser<AuthTokenPayload, AuthTokenResponse, WorkerResponse> extends BaseService implements ITelegramMiniAppParser<WorkerResponse> {
     private readonly DEFAULT_USER_BOT_DATA_EXPIRATION_TIME = 55 * 60 * 1000;
 
     private userBotsData: UserBotData[];
@@ -24,7 +24,7 @@ export abstract class ParserService<AuthTokenPayload, AuthTokenResponse, WorkerR
 
     private readonly userBotService: IUserBotService;
 
-    constructor(userBots: UserBot[], parserName: string, options: ParserServiceOptions) {
+    constructor(userBots: UserBot[], parserName: string, options: TelegramMiniAppParserOptions) {
         super(parserName);
         const { botUsername, appBaseUrl, authEndpoint, authRefererHeader, workerTimeout, userBotDataExpirationTime } = options;
         this.BOT_USERNAME = botUsername;

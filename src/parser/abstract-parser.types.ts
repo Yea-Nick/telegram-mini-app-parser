@@ -4,7 +4,7 @@ export interface UserBotData {
     initData: string;
 }
 
-export interface ParserServiceOptions {
+export interface TelegramMiniAppParserOptions {
     botUsername: string;
     appBaseUrl: string;
     authEndpoint: string;

@@ -1,3 +1,3 @@
-export { ParserService } from './abstract-parser.service';
-export { UserBotData, ParserServiceOptions } from './abstract-parser.types';
-export { IParserService } from './abstract-parser.interface';
+export { TelegramMiniAppParser } from './abstract-parser.service';
+export { UserBotData, TelegramMiniAppParserOptions } from './abstract-parser.types';
+export { ITelegramMiniAppParser } from './abstract-parser.interface';
