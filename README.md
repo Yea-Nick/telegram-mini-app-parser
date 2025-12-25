@@ -29,7 +29,8 @@ This project automatically retrieves initData from Telegram and authorizes your 
 
 ---
 
-📚 Terminology
+## 📚 Terminology
+
 Few terms if you are not familiar with TMA's or Telegram userbots.
 
 1. Telegram Mini App (TMA)
