@@ -52,7 +52,7 @@ A userBot is a bot that mimics a regular Telegram user to interact with the Tele
 To install the package, use the following command:
 
 ```bash
-npm install telegram-TMAs-parser
+npm install telegram-mini-app-parser
 ````
 
 ---
@@ -66,7 +66,7 @@ To use this package, you need to create a new class that extends `TelegramMiniAp
 In your file, import the necessary entities:
 
 ```typescript
-import { TelegramMiniAppParser, TelegramMiniAppParserOptions, UserBot, UserData, SocksProxyAgent  } from 'telegram-TMAs-parser';
+import { TelegramMiniAppParser, TelegramMiniAppParserOptions, UserBot, UserData, SocksProxyAgent  } from 'telegram-mini-app-parser';
 ```
 
 ### 2. Define Your Custom Parser Class
@@ -78,7 +78,7 @@ Create a new class that extends `TelegramMiniAppParser` and implements its abstr
 
 Here is a full example of how to set up and use the parser:
 
-import { TelegramMiniAppParser, TelegramMiniAppParserOptions, UserBot, UserData, SocksProxyAgent } from 'telegram-TMAs-parser';
+import { TelegramMiniAppParser, TelegramMiniAppParserOptions, UserBot, UserData, SocksProxyAgent } from 'telegram-mini-app-parser';
 
 class MyParser extends TelegramMiniAppParser<AuthTokenPayload, AuthTokenResponse, WorkerResponse> {
   constructor(userBots: UserBot[], parserName: string, options: TelegramMiniAppParserOptions) {
