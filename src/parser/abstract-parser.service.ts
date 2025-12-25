@@ -7,6 +7,7 @@ import { IRequesterService, RequestMethod, ApiRequestOptions, RequesterService }
 
 export abstract class TelegramMiniAppParser<AuthTokenPayload, AuthTokenResponse, WorkerResponse> extends BaseService implements ITelegramMiniAppParser<WorkerResponse> {
     private readonly DEFAULT_USER_BOT_DATA_EXPIRATION_TIME = 55 * 60 * 1000;
+    private isShutdown = false;
 
     private userBotsData: UserBotData[];
 
@@ -70,6 +71,8 @@ export abstract class TelegramMiniAppParser<AuthTokenPayload, AuthTokenResponse,
     private async launchParser() {
         try {
             await this.parse();
+
+            if (this.isShutdown) return;
 
             if (typeof this.WORKER_TIMEOUT === 'number') {
                 this.launchParserTimeout = setTimeout(this.launchParser.bind(this), this.WORKER_TIMEOUT);
@@ -196,6 +199,7 @@ export abstract class TelegramMiniAppParser<AuthTokenPayload, AuthTokenResponse,
 
     async shutdown() {
         try {
+            this.isShutdown = true;
             this.launchParserTimeout && clearTimeout(this.launchParserTimeout);
 
             this.logInfo(`Shutdown | Success`);

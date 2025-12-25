@@ -4,7 +4,7 @@ This Node.js package provides a simple way to **parse Telegram Mini Apps** using
 
 ---
 
-🧩 Project Overview
+## 🧩 Project Overview
 
 This project automatically retrieves initData from Telegram and authorizes your userbot to access the desired Telegram Mini App. Once authorized, you can implement custom logic in the worker function to make requests as a regular Telegram user.
 
@@ -14,7 +14,7 @@ This project automatically retrieves initData from Telegram and authorizes your 
 
 - **Extendable**: Inherit the abstract `TelegramMiniAppParser` to customize parsing logic.
 - **Proxy support**: Supports using proxy servers for parsing.
-- **Telegram userbot rotation**: Use multiple userbots with different proxies not to be rate-limited by a Mini App.
+- **Telegram userbot Round-Robin rotation**: Use multiple userbots with different proxies not to be rate-limited by a Mini App.
 - **Timeout control**: Manage worker timeouts between parsing iterations.
 - **Flexible Configuration**: Configure the bot, authentication endpoint, and more.
 
@@ -76,8 +76,6 @@ Create a new class that extends `TelegramMiniAppParser` and implements its abstr
 ```typescript
 ## 🎮 Example Code
 
-Here is a full example of how to set up and use the parser:
-
 import { TelegramMiniAppParser, TelegramMiniAppParserOptions, UserBot, UserData, SocksProxyAgent } from 'telegram-mini-app-parser';
 
 class MyParser extends TelegramMiniAppParser<AuthTokenPayload, AuthTokenResponse, WorkerResponse> {
@@ -91,17 +89,17 @@ class MyParser extends TelegramMiniAppParser<AuthTokenPayload, AuthTokenResponse
   }
 
   async extractAuthToken(authTokenResponse: AuthTokenResponse): Promise<string> {
-    // Extract auth token from the response
-    return authTokenResponse.token;
+    //Extract auth token from the TMA's authentication response and format the authorization header. 
+    return `Bearer ${authTokenResponse.token}`;
   }
 
   async formAuthTokenPayload(initData: string, userData: UserData): Promise<AuthTokenPayload> {
-    // Form the authentication payload
-    return { token: 'your-auth-token' };
+    // Form the authentication payload that is required by the TMA you are willing to parse
+    return { telegramId: userData.id };
   }
 
   async getCustomHeaders(initData: string): Promise<HeadersInit> {
-    // Create custom headers, or return an empty object if not needed
+    //Create custom headers required by the TMA to authenticate userbot, or return an empty object if not needed
     return {};
   }
 }
@@ -112,7 +110,7 @@ const userBots: UserBot[] = [
     apiId: 123456,
     apiHash: 'yourApiHashHere',
     username: 'yourBotUsername',
-    proxy: {
+    proxy: {  //SOCKS5 proxy only
       ip: 'proxyIpHere',
       port: 'proxyPortHere',
       username: 'proxyUser',
@@ -169,7 +167,7 @@ When calling `super()`, you need to pass the following parameters:
        apiId: 123456,
        apiHash: 'yourApiHashHere',
        username: 'yourUserBotUsername',
-       proxy: {
+       proxy: {  //SOCKS5 proxy only
          ip: 'proxyIpHere',
          port: 'proxyPortHere',
          username: 'proxyUser', //Proxy authentication username
@@ -184,7 +182,7 @@ When calling `super()`, you need to pass the following parameters:
 3. **options**: An object of type `TelegramMiniAppParserOptions`, containing:
 
    * `botUsername`: Telegram bot's username that you use to open the TMA that you are willing to parse
-   * `appBaseUrl`: The base URL of the Telegram Mini App (e.g., `https://backend.TMA.com`). To obtain it, open web version of Telegram and use developer's console to identify the URL that is used by the TMA for requests
+   * `appBaseUrl`: The base URL of the Telegram Mini App (e.g., `https://backend.mini-app.com`). To obtain it, open web version of Telegram and use developer's console to identify the URL that is used by the TMA for requests
    * `authEndpoint`: The authentication endpoint (e.g., `/api/v1/auth`).    
    * `authRefererHeader`: The referer header for the authentication request. You can get it by inspecting requests to the authentication endpoint of the TMA
    * `workerTimeout`: Timeout control for workers in milliseconds. Keep in mind that the timeout is only set after the worker finished its job to avoid parallel jobs running.
@@ -192,16 +190,16 @@ When calling `super()`, you need to pass the following parameters:
      * `false`: No timeout. If `false` is provided, then `init()` function call returns a function that can be called any time to launch worker. This function returns `WorkerResponse` in case of success or `undefined` in case of failure job's iteration. `WorkerParams` can be passed to this function and will be available in your custom `worker()` function as rest parameters. 
      * `number`: A fixed timeout value. 
      * `function`: A function that returns a timeout value based on certain conditions.
-   * `userBotDataExpirationTime`: The expiration time (in ms) of userbot data. Your TMA's JWT TTL. Defaults to 55 minutes. 
+   * `userBotDataExpirationTime`: The expiration time (in ms) of userbot data. Basically, your TMA's JWT TTL. Defaults to 55 minutes. 
 
 Example options:
 
 ```typescript
 const options: TelegramMiniAppParserOptions = {
   botUsername: 'MiniApp_bot',
-  appBaseUrl: 'https://backend.TMA.com',
+  appBaseUrl: 'https://backend.mini-app.com',
   authEndpoint: '/api/v1/auth',
-  authRefererHeader: 'https://TMA.com/',
+  authRefererHeader: 'https://mini-app.com/',
   workerTimeout: 10000,  // 10 seconds timeout
   userBotDataExpirationTime: 3300000,  // 55 minutes
 };
@@ -224,22 +222,22 @@ myParser.init().then(() => {
 });
 ```
 
-If `false` is provided, then `init()` function call returns a function that can be called any time to launch worker. This function returns `Promise<WorkerResponse | undefined>`. `WorkerResponse` is returned in case of success and `undefined` is returned in case of unsuccessful job iteration. `WorkerParams` can be passed to this function and will be available in your custom `worker()` function as rest parameters. 
+If `false` is provided, then `init()` function call returns a function that can be called any time to launch worker. This function returns `Promise<WorkerResponse | undefined>`. `WorkerResponse` is returned in case of success and `undefined` is returned in case of the unsuccessful job iteration. `WorkerParams` can be passed to this function and will be available in your custom `worker()` function as rest parameters. 
 ```typescript
 const parse: (...workerParams: WorkerParams) => Promise<WorkerResponse | undefined> = await myParser.init();
-const parsingResponse: WorkerResponse | undefined = await parse(myCustomParam, anotherCustomParam);
+const parsingResponse: WorkerResponse | undefined = await parse(myCustomArg, anotherCustomArg);
 ```
 
 ### 5. Shutting Down the Worker (Optional)
 
-If you are using `workerTimeout` to control the frequency of the parsing, and you want to stop the worker after finishing the task, you should call the `shutdown()` method.
+If you are using `workerTimeout` to control the frequency of the parsing, and you want to stop the worker after finishing the task, you should call the `shutdown()` method. If you call the shutdown() method while the job is running, the worker will finish its task, and no more timeouts will be set to run the next job
 
 Example:
 
 ```typescript
 // After completing parsing, call shutdown to stop the worker
 myParser.shutdown().then(() => {
-  console.log('Worker has been shut down.');
+  console.log('Worker has been shut down.');  //No new job iterations will be processed
 }).catch((error) => {
   console.error('Shutdown error:', error);
 });
@@ -252,14 +250,14 @@ myParser.shutdown().then(() => {
 `TelegramMiniAppParser` is a **generic class** with three parameters that you need to provide:
 
 1. **AuthTokenPayload**: The data that needs to be sent to the endpoint for authentication in the Telegram Mini App. You can investigate it by inspecting the requests made while opening the Telegram Mini App in Telegram Web.  
-2. **AuthTokenResponse**: The data returned by the Telegram Mini App in response to a successful authentication. This usually contains the Telegram account information and the JWT token. Similarly, you can inspect in Telegram Web while opening the TMA. 
+2. **AuthTokenResponse**: The data returned by the Telegram Mini App in response to a successful authentication. This usually contains the Telegram account information and the JWT token. Similarly, you can inspect it in Telegram Web while opening the TMA. 
 3. **WorkerResponse**: The custom response that the implemented worker function returns. This can be any custom data depending on the parsing requirements.
 
 ---
 
 ## 📝 Functions to Implement
 
-To fully customize your parser, you need to implement the following methods:
+You need to implement the following methods:
 
 ### 1. **worker()** — Custom worker function
 
@@ -267,7 +265,7 @@ The following arguments will be automatically passed to this function in case yo
 
 * `authToken`: The token for authorization. Usually, a JWT. 
 * `initData`: Initialization data sent by Telegram to identify the user in the Mini App.
-* `proxyAgent`: The proxy configuration.
+* `proxyAgent`: The SOCKS5 proxy configuration.
 * `workerParams`: An array of custom parameters that will be passed if `workerTimeout` is set to `false`. 
 
 ```typescript
@@ -278,9 +276,10 @@ async worker<WorkerParams extends Array<any>>(authToken: string, initData: strin
 
 ### 2. **extractAuthToken()** — Extract the authorization token
 
-Implement this function to extract the token from the `AuthTokenResponse` returned by the Telegram Mini App. You should return a `string`.
+Implement this function to extract the token from the `AuthTokenResponse` returned by the Telegram Mini App and format the authorization header. You should return a `string`.
 
 ```typescript
+## 🎮 Example Code
 async extractAuthToken(authTokenResponse: AuthTokenResponse) {
     return `Bearer ${authTokenResponse.JWT}`;
 }
