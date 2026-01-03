@@ -1,4 +1,4 @@
-# 📦 Telegram Mini Apps Parser (Node.js Package)
+# 📦 Telegram Mini Apps Parser
 
 This Node.js package provides a simple way to **parse Telegram Mini Apps** using **TypeScript**. It allows you to extend and customize the parsing process by implementing an abstract class called `TelegramMiniAppParser`.
 
