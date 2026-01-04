@@ -7,18 +7,16 @@ export abstract class LogHandler {
 
     constructor(private readonly serviceName: string) {
         const { combine, timestamp, colorize, printf } = format;
-        const NODE_ENV = process.env.NODE_ENV;
-        if (!NODE_ENV) throw new Error(`Node environment is undefined`);
 
         this.logger = createLogger({
-            defaultMeta: { service_name: serviceName, env: NODE_ENV },
+            defaultMeta: { service_name: serviceName },
             transports: [
                 new Console({
                     level: 'silly',
                     format: combine(
                         timestamp(),
-                        printf(({ level, message, service_name, env, timestamp }) => {
-                            return `${env} | ${new Date(timestamp as string).toLocaleString()} [${level.toUpperCase()}] ${service_name} | ${message}`;
+                        printf(({ level, message, service_name, timestamp }) => {
+                            return `${new Date(timestamp as string).toLocaleString()} [${level.toUpperCase()}] ${service_name} | ${message}`;
                         }),
                         colorize({ all: true })
                     )
