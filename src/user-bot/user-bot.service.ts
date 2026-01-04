@@ -2,8 +2,6 @@ import { BaseService } from "../service";
 import { Api, TelegramClient } from "telegram";
 import { IProxyService, ProxyService } from "../proxy";
 import { IUserBotService, UserBot, UserData } from ".";
-import { validateOrReject } from "class-validator";
-import { plainToInstance } from "class-transformer";
 import { StringSession } from 'telegram/sessions';
 import { IRequesterService } from "../requester";
 
@@ -25,9 +23,8 @@ export class UserBotService extends BaseService implements IUserBotService {
     async init() {
         try {
             await this.proxyService.init();
-            const validated = await this.validateUserBots(this.userBots);
 
-            for (const userBot of validated) {
+            for (const userBot of this.userBots) {
                 await this.proxyService.testProxy(await this.proxyService.getSocksProxyAgent(userBot.proxy), userBot.proxy.ip);
                 await this.connectClient(userBot);
             }
@@ -35,19 +32,6 @@ export class UserBotService extends BaseService implements IUserBotService {
             this.logInfo(`Service is initialized`);
         } catch (err) {
             this.logAndThrowError(`Initialization | ${err}`);
-        }
-    }
-
-    private async validateUserBots(userBots: UserBot[]) {
-        try {
-            for (const userBot of this.userBots) {
-                const instance = plainToInstance(UserBot, userBot);
-                await validateOrReject(instance);
-            }
-
-            return userBots;
-        } catch (err) {
-            this.logAndThrowError(`Validate user-bots | ${err}`);
         }
     }
 
