@@ -1,6 +1,6 @@
 {
   "name": "telegram-mini-app-parser",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
   "files": [
@@ -19,7 +19,7 @@
   ],
   "author": "Yea-Nick",
   "license": "ISC",
-  "type": "module",
+  "type": "commonjs",
   "devDependencies": {
     "@types/node": "^25.0.3",
     "rimraf": "^6.1.2",
